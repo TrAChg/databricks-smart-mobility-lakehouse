@@ -47,7 +47,9 @@ def test_ingest_trips_batch(
 
     assert df.count() == 1
     assert "_batch_id" in df.columns
-    assert df.select("_batch_id").first()[0] == "test_batch_1"
+    first_row = df.select("_batch_id").first()
+    assert first_row is not None
+    assert first_row[0] == "test_batch_1"
 
     # Delta table check
     bronze_trips = bronze.get_bronze_trips()

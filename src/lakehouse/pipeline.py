@@ -1,4 +1,5 @@
 import sys
+
 from delta.tables import DeltaTable
 from pyspark.sql import SparkSession
 

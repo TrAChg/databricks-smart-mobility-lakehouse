@@ -46,6 +46,7 @@ def test_silver_cleansing_and_enrichment(
     # The 2 invalid trips must be filtered out
     assert silver_df.count() == 1
     row = silver_df.first()
+    assert row is not None
     assert row["trip_id"] == "TRP-VALID-EBIKE"
     assert row["duration_min"] == 30.0
     # 10.0 km * 0.130 kg CO2/km = 1.300 kg CO2 saved
@@ -88,8 +89,10 @@ def test_silver_acid_merge_cdc(
 
     initial_silver = silver.get_silver_trips()
     assert initial_silver.count() == 1
-    assert initial_silver.first()["fare_eur"] == 2.0
-    assert initial_silver.first()["status"] == "ongoing"
+    initial_row = initial_silver.first()
+    assert initial_row is not None
+    assert initial_row["fare_eur"] == 2.0
+    assert initial_row["status"] == "ongoing"
 
     # Batch 2: Update TRP-100 and insert TRP-200
     b2_json = temp_lakehouse_config.raw_dir / "b2.json"
@@ -110,6 +113,7 @@ def test_silver_acid_merge_cdc(
 
     # Check that TRP-100 was updated
     updated_trp_100 = updated_silver.filter("trip_id = 'TRP-100'").first()
+    assert updated_trp_100 is not None
     assert updated_trp_100["fare_eur"] == 5.5
     assert updated_trp_100["status"] == "completed"
     assert updated_trp_100["distance_km"] == 7.0

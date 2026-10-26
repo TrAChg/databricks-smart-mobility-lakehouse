@@ -52,6 +52,7 @@ def test_gold_daily_city_kpis_and_station_utilization(
     kpis_df = gold.build_daily_city_kpis(silver.get_silver_trips())
     assert kpis_df.count() == 1
     row = kpis_df.first()
+    assert row is not None
     assert row["city"] == "Paris"
     assert row["vehicle_type"] == "ebike"
     assert row["total_trips"] == 2
@@ -63,12 +64,14 @@ def test_gold_daily_city_kpis_and_station_utilization(
     station_df = gold.build_station_utilization(silver.get_silver_trips())
     # ST-01 had 2 departures, 0 arrivals -> net flow -2
     st1 = station_df.filter("station_id = 'ST-01'").first()
+    assert st1 is not None
     assert st1["departures_count"] == 2
     assert st1["arrivals_count"] == 0
     assert st1["net_flow"] == -2
 
     # ST-02 had 0 departures, 2 arrivals -> net flow +2
     st2 = station_df.filter("station_id = 'ST-02'").first()
+    assert st2 is not None
     assert st2["departures_count"] == 0
     assert st2["arrivals_count"] == 2
     assert st2["net_flow"] == 2
