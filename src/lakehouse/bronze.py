@@ -21,13 +21,8 @@ class BronzeIngestion:
         raw_json_path: Path | str,
         batch_id: str | None = None,
     ) -> DataFrame:
-        """Ingest a batch of raw trip event logs into the Bronze Delta table.
-
-        Adds audit columns:
-        - `_ingest_timestamp`: exact time when the record was ingested into the lakehouse.
-        - `_source_file`: full path of the source file.
-        - `_batch_id`: identifier grouping the ingestion job.
-        """
+        """Ingest a batch of raw trip event logs into the Bronze Delta table."""
+        
         source_str = str(raw_json_path)
         cur_batch = batch_id or f"batch_{int(time.time())}"
 

@@ -8,6 +8,7 @@ dependencies = [
     "pyspark==3.5.3",
     "delta-spark==3.2.1",
     "pandas>=2.0.0",
+    "pyarrow>=14.0.0",
     "python-dotenv>=1.0.0",
 ]
 
