@@ -1,0 +1,13 @@
+station_id,station_name,city,latitude,longitude,capacity
+ST01,Gare de Lyon,Paris,48.8443,2.3744,45
+ST02,Chatelet - Les Halles,Paris,48.8606,2.3476,60
+ST03,La Defense Grande Arche,Paris,48.8924,2.2384,50
+ST04,Montparnasse Bienvenue,Paris,48.8421,2.3219,40
+ST05,Place Bellecour,Lyon,45.7578,4.8322,35
+ST06,Part-Dieu Gare,Lyon,45.7606,4.8594,50
+ST07,Vieux Lyon Saint-Jean,Lyon,45.7600,4.8269,30
+ST08,Gare Lille Flandres,Lille,50.6366,3.0700,40
+ST09,Grand Place Lille,Lille,50.6370,3.0630,25
+ST10,Capitole,Toulouse,43.6047,1.4442,35
+ST11,Gare Matabiau,Toulouse,43.6111,1.4536,45
+ST12,Commerce,Nantes,47.2133,-1.5583,35
