@@ -24,7 +24,7 @@
 ### 2. Silver Layer (Cleansing, CO2 Features & Delta ACID Merge)
 - **Quality Gates:** Filters out GPS drift, negative distances, and anomalous trip durations ($0 < \text{duration} < 720\text{ min}$).
 - **Carbon Offset Feature Engineering:** Computes emissions avoided ($\text{kg } \text{CO}_2$) vs. standard combustion vehicles:
-  $$\text{CO}_{2\text{ saved}} = \begin{cases} 
+  $$\text{CO}_{2\text{ saved}} = \begin{cases}
   \text{distance} \times 0.130\text{ kg} & \text{e-bike} \\
   \text{distance} \times 0.125\text{ kg} & \text{e-scooter} \\
   \text{distance} \times 0.090\text{ kg} & \text{EV car} \\

@@ -5,7 +5,8 @@ from pyspark.sql import SparkSession
 
 if sys.stdout.encoding != "utf-8":
     try:
-        sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     except Exception:
         pass
 
@@ -85,6 +86,7 @@ def run_lakehouse_pipeline(config: LakehouseConfig | None = None) -> None:
     silver_delta_table.history(3).select(
         "version", "timestamp", "operation", "operationMetrics"
     ).show(truncate=False)
+
 
 if __name__ == "__main__":
     run_lakehouse_pipeline()
