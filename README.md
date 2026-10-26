@@ -1,4 +1,4 @@
-# 🚲 Databricks Smart Mobility Lakehouse
+# Databricks Smart Mobility Lakehouse
 
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)](https://www.python.org/)
 [![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.5.x-orange.svg)](https://spark.apache.org/)
@@ -8,60 +8,11 @@
 [![Type Checked](https://img.shields.io/badge/type%20checked-mypy-blue.svg)](https://mypy-lang.org/)
 [![Test Suite](https://img.shields.io/badge/tests-pytest-green.svg)](https://pytest.org/)
 
-An enterprise-grade **Lakehouse Architecture** for multi-modal urban mobility (e-bikes, e-scooters, and EV car-sharing across **Paris, Lyon, Lille, Toulouse, and Nantes**). Built with **PySpark** and **Delta Lake 3.2**, this repository implements a complete **Medallion Architecture (Bronze $\to$ Silver $\to$ Gold)** featuring ACID transactions, Change Data Capture (CDC) upserts, carbon-saving feature engineering, and multi-dimensional Z-Ordering.
+**Lakehouse Architecture** for multi-modal urban mobility (e-bikes, e-scooters, and EV car-sharing across **Paris, Lyon, Lille, Toulouse, and Nantes**). Built with **PySpark** and **Delta Lake 3.2**, this repository implements a complete **Medallion Architecture (Bronze $\to$ Silver $\to$ Gold)** featuring ACID transactions, Change Data Capture (CDC) upserts, carbon-saving feature engineering, and multi-dimensional Z-Ordering.
 
 ---
 
-## 🏗️ Architecture & Medallion Data Flow
-
-```mermaid
-flowchart TD
-    subgraph Ingestion[" 📥 Ingestion Sources "]
-        RawIoT["IoT Trip Events (JSON Batches / Streaming)"]
-        RawStations["Station Metadata (CSV Master Data)"]
-    end
-
-    subgraph Bronze[" 🥉 Bronze Layer: Raw Data Fidelity "]
-        B_Trips[("bronze.trips<br/>(Delta Table - Append Only)<br/>+ _ingest_ts, _source_file, _batch_id")]
-        B_Stations[("bronze.stations<br/>(Delta Table - Overwrite Snapshot)")]
-    end
-
-    subgraph Silver[" 🥈 Silver Layer: Cleanse, Enrich & CDC Upsert "]
-        S_Clean["Data Cleansing & Validation Gates<br/>- Duration > 0 & < 12h<br/>- Distance > 0 km<br/>- Deduplication on trip_id"]
-        S_Feat["Feature Engineering & Enrichment<br/>- CO2 Offset Calculation (kg vs combustion)<br/>- Dimensional Join (Start/End City & Station)"]
-        S_Table[("silver.trips_enriched<br/>(Delta Table - Partitioned by trip_date)<br/>ACID MERGE INTO (CDC Upsert)")]
-    end
-
-    subgraph Gold[" 🥇 Gold Layer: Business Aggregates & Z-Order "]
-        G_KPIs[("gold.daily_city_kpis<br/>(Delta Table - Partitioned by trip_date)<br/>OPTIMIZE ZORDER BY (city, vehicle_type)")]
-        G_Stations[("gold.station_utilization<br/>(Delta Table - Turnover & Capacity Flow)")]
-    end
-
-    subgraph Consumption[" 📊 Enterprise Consumption "]
-        BI["Executive Mobility Dashboard / PowerBI / Tableau"]
-        CityOps["Fleet Rebalancing Operations & Alerts"]
-        ESG["Corporate Sustainability & Carbon Offsets Reporting"]
-    end
-
-    RawIoT --> B_Trips
-    RawStations --> B_Stations
-
-    B_Trips --> S_Clean
-    B_Stations -.-> S_Feat
-    S_Clean --> S_Feat
-    S_Feat -->|Delta MERGE INTO| S_Table
-
-    S_Table --> G_KPIs
-    S_Table --> G_Stations
-
-    G_KPIs --> BI
-    G_KPIs --> ESG
-    G_Stations --> CityOps
-```
-
----
-
-## ⚡ Key Architectural Patterns
+## Key Architectural Patterns
 
 ### 1. Bronze Layer (Raw Ingestion & Lineage Tracking)
 - **Zero Loss & Schema Evolution:** Ingests raw JSON trip events and station catalogs directly into Delta tables without lossy transformations.
@@ -79,7 +30,7 @@ flowchart TD
   \text{distance} \times 0.090\text{ kg} & \text{EV car} \\
   \text{distance} \times 0.100\text{ kg} & \text{other}
   \end{cases}$$
-- **Change Data Capture (CDC) via Delta Lake `MERGE INTO`:**
+- **Change Data Capture via Delta Lake `MERGE INTO`:**
   ```python
   target_table.alias("target").merge(
       incoming_df.alias("source"), "target.trip_id = source.trip_id"
@@ -107,7 +58,7 @@ flowchart TD
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 databricks-smart-mobility-lakehouse/
@@ -139,7 +90,7 @@ databricks-smart-mobility-lakehouse/
 
 ---
 
-## 🚀 Quickstart & Local Execution
+## Quickstart & Local Execution
 
 ### Prerequisites
 - Python 3.10 or 3.11
@@ -174,19 +125,7 @@ Run unit and integration tests with Pytest:
 pytest tests/ -v
 ```
 
-### 4. Deploying to Databricks
-1. **Databricks Repos:** In your Databricks workspace, navigate to **Repos** $\to$ **Add Repo** $\to$ paste `https://github.com/TrAChg/databricks-smart-mobility-lakehouse.git`.
-2. **Interactive Notebook:** Open `notebooks/databricks_mobility_lakehouse.ipynb` and attach it to any cluster running **Databricks Runtime 14.x+ (Spark 3.5+, Delta 3.2+)**.
-3. **Unity Catalog Migration:** To persist as managed tables in Unity Catalog, replace local paths with:
-   ```sql
-   CREATE TABLE main.mobility.silver_trips_enriched
-   USING DELTA
-   AS SELECT * FROM ...
-   ```
-
----
-
-## 📊 Sample Output (Gold Layer)
+## Sample Output (Gold Layer)
 
 ### `gold.daily_city_kpis`
 | trip_date | city | vehicle_type | total_trips | unique_riders | total_distance_km | avg_duration_min | total_revenue_eur | avg_fare_eur | total_co2_saved_kg |
@@ -198,25 +137,3 @@ pytest tests/ -v
 | 2026-01-01 | Nantes | escooter | 1 | 1 | 3.10 | 11.00 | 2.20 | 2.20 | 0.388 |
 
 ---
-
-## 🎯 Production Best Practices & Interview Takeaways
-
-1. **Why Medallion Architecture over Traditional Data Warehouses?**
-   - Decouples raw storage from business logic, ensuring replayability and auditability.
-   - Bronze preserves raw semi-structured fidelity; Silver normalizes and applies governance; Gold serves pre-computed dimensional views directly to BI.
-2. **Delta Lake vs. Raw Parquet:**
-   - ACID transactions eliminate partial write failures from failed pipeline runs.
-   - Micro-compaction and Z-Ordering prevent the "small file problem" common in streaming ingestion.
-   - Time travel allows instant point-in-time recovery and compliance auditing.
-3. **Handling Data Skew:**
-   - In production scenarios with heavy traffic concentrated in Paris stations, Adaptive Query Execution (AQE) automatically splits skewed partitions, while broadcast hash joins (`broadcast(stations_df)`) eliminate expensive network shuffle for station master tables.
-
----
-
-## 👨‍💻 Author
-
-**Tran Chung**  
-- Université de Technologie de Compiègne (UTC) — *Diplôme d'Ingénieur Génie Informatique (IA & Données)*  
-- Master 2 Recherche Informatique — ISC (Track AOS)  
-- GitHub: [@TrAChg](https://github.com/TrAChg)  
-- LinkedIn: [Chung Tran](https://www.linkedin.com/in/chung-tran-5b1287313/)

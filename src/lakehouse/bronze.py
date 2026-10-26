@@ -21,22 +21,24 @@ class BronzeIngestion:
         raw_json_path: Path | str,
         batch_id: str | None = None,
     ) -> DataFrame:
-        """Ingest a batch of raw trip event logs into the Bronze Delta table."""
-        
+        """Ingest a batch of raw trip event logs into the Bronze Delta table.
+
+        Adds audit columns:
+        - `_ingest_timestamp`: exact time when the record was ingested into the lakehouse.
+        - `_source_file`: full path of the source file.
+        - `_batch_id`: identifier grouping the ingestion job.
+        """
         source_str = str(raw_json_path)
         cur_batch = batch_id or f"batch_{int(time.time())}"
 
-        # 1. Read raw JSON schema
         raw_df = self.spark.read.option("multiline", "true").json(source_str)
 
-        # 2. Append technical audit columns (Raw Data Fidelity)
         bronze_df = (
             raw_df.withColumn("_ingest_timestamp", current_timestamp())
             .withColumn("_source_file", input_file_name())
             .withColumn("_batch_id", lit(cur_batch))
         )
 
-        # 3. Write append-only to Delta Bronze table
         (
             bronze_df.write.format("delta")
             .mode("append")
